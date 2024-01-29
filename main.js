@@ -78,5 +78,19 @@ app.get('/players/:userId',(req,res)=>{
 
 });
 
+//Uppdatera - replacea hela objektet
+app.put('/players/:userId',(req,res)=>{
+    //Hittar spelaren
+    let updatePlayer = players.find(player=>player.id == req.params.userId)
+    // 404??? Om den inte finns
+    if(updatePlayer == undefined){
+        res.status(404).send('Finns inte')
+    }
+    updatePlayer.name = req.body.name
+    updatePlayer.jersey = req.body.jersey
+    updatePlayer.position = req.body.position
+    updatePlayer.id = req.body.id
+    res.status(204).send('Uppdaterat')
 
+})
 
