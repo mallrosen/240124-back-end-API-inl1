@@ -2,6 +2,9 @@ const express = require('express')
 const app = express()
 const port = 3000
 const cors = require('cors')
+
+var bodyParser = require('body-parser')
+app.use(bodyParser.json())
 app.use(cors())
 
 const players = [{
@@ -28,7 +31,7 @@ const players = [{
     name: "Mats Sundin",
     jersey: 21,
     position: "Center",
-    id:52
+    id:5
 },{
     name: "Nicke Bergman",
     jersey:7,
@@ -37,17 +40,6 @@ const players = [{
 }]
 
 
-app.get('/players/:userId', (req, res)=>{
-    console.log(req.params.userId)
-
-    let p = players.find(e=>e.id == req.params.userId)
-
-
-    if(p == undefined){
-        res.status(404).send('Not found')
-    }
-    res.json(p)
-})
 
 
 
@@ -58,3 +50,33 @@ app.listen(port, () => {
 app.get('/players', (req, res)=>{
     res.json(players)
 })
+
+
+//ta det som finns i bodyn och skapar nytt objekt för att lägga in i arrayen.
+app.post('/players', (req, res)=>{
+    const play = {
+        name: req.body.name,
+        jersey: req.body.jersey,
+        position: req.body.position,
+        id: (players.length + 1)
+    }
+    players.push(play)
+
+    console.log(req.body);
+    res.status(201).send('Created')
+})
+
+
+app.get('/players/:userId',(req,res)=>{
+    console.log(req.params.userId)
+    let p = players.find(player=>player.id == req.params.userId)
+    // 404???
+    if(p == undefined){
+        res.status(404).send('Finns inte')
+    }
+    res.json(p)
+
+});
+
+
+
