@@ -94,3 +94,14 @@ app.put('/players/:userId',(req,res)=>{
 
 })
 
+
+//För att kunna radera
+app.delete('/api/employees/:anvId',(req,res)=>{
+    let deletePlayer = players.find(player=>player.id == req.params.userId)
+    // 404???
+    if(deletePlayer == undefined){
+        res.status(404).send('Finns inte')
+    }
+    players.splice(players.indexOf(deletePlayer),1)
+    res.status(204).send('')  
+});
