@@ -96,7 +96,7 @@ app.put('/players/:userId',(req,res)=>{
 
 
 //För att kunna radera
-app.delete('/api/employees/:anvId',(req,res)=>{
+app.delete('/players/:userId',(req,res)=>{
     let deletePlayer = players.find(player=>player.id == req.params.userId)
     // 404???
     if(deletePlayer == undefined){
