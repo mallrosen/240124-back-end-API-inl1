@@ -7,48 +7,81 @@ var bodyParser = require('body-parser')
 app.use(bodyParser.json())
 app.use(cors())
 
-const players = [{
-    name: "Malin Rosén",
-    jersey:13,
-    position: "Goalie",
-    id:1
-},{
-    name: "Stefan Stefan",
-    jersey:9,
-    position: "Forward",
-    id:2
-},{
-    name: "Matilda Wallin",
-    jersey:3,
-    position: "Center",
-    id:3
-},{
-    name: "Pelle Lindbergh",
-    jersey:2,
-    position: "Goalie",
-    id:4
-},{
-    name: "Mats Sundin",
-    jersey: 21,
-    position: "Center",
-    id:5
-},{
-    name: "Nicke Bergman",
-    jersey:7,
-    position: "Forward",
-    id:6
-}]
+const { sequelize, Player } = require('./models')
+const migrationhelper = require('./migrationhelper')
+
+app.listen(port, async () => {await migrationhelper.migrate()
+    await sequelize.authenticate()
+    console.log(`Example app listening2 on port ${port}`)
+})
+
+// const players = [{
+//     name: "Malin Rosén",
+//     jersey:13,
+//     position: "Goalie",
+//     id:1
+// },{
+//     name: "Stefan Stefan",
+//     jersey:9,
+//     position: "Forward",
+//     id:2
+// },{
+//     name: "Matilda Wallin",
+//     jersey:3,
+//     position: "Center",
+//     id:3
+// },{
+//     name: "Pelle Lindbergh",
+//     jersey:2,
+//     position: "Goalie",
+//     id:4
+// },{
+//     name: "Mats Sundin",
+//     jersey: 21,
+//     position: "Center",
+//     id:5
+// },{
+//     name: "Nicke Bergman",
+//     jersey:7,
+//     position: "Forward",
+//     id:6
+// }]
 
 
 
 
+let players = []
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-  })
+app.post('/players', async (req, res) => {
+    const { name, jersey, position } = req.body;
+    const player = {
+        name,
+        jersey,
+        position
+    };
 
-app.get('/players', (req, res)=>{
+    players.push(player);
+    console.log('Player added:', player);
+    res.sendStatus(201); // Created
+});
+
+
+
+// app.listen(port, () => {
+//     console.log(`Example app listening on port ${port}`)
+//   })
+
+app.get('/players', async (req, res)=>{
     res.json(players)
+})
+
+app.get('/api/players',async (req,res)=>{
+    let players = await Player.findAll()
+    let result = players.map(p=>({
+        userid: p.userid,
+        name: p.name
+    }))
+     res.json(result)
 })
 
 
@@ -67,7 +100,7 @@ app.post('/players', (req, res)=>{
 })
 
 
-app.get('/players/:userId',(req,res)=>{
+app.get('/players/:userId',async (req,res)=>{
     console.log(req.params.userId)
     let p = players.find(player=>player.id == req.params.userId)
     // 404???
