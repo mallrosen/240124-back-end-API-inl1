@@ -2,9 +2,9 @@
 
 GET http://localhost:3000/players
 
-### Get single
+# ### Get single
 
-GET http://localhost:3000/players/1
+# GET http://localhost:3000/players/1
 
 ### Create new
 
@@ -27,7 +27,7 @@ Content-Type: application/json; charset=utf-8
     "name": "Malin3 Rosén",
     "jersey": 13,
     "position": "Goalie",
-    "id": 1
+    "team": "hjehejh"
 }
 
 ###Radera
