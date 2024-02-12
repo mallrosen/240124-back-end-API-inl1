@@ -15,7 +15,7 @@ Content-Type: application/json; charset=utf-8
     "name": "Malin1 Rosén",
     "jersey": 13,
     "position": "Goalie",
-    "id": 1
+    "team": "BAJEN"
 }
 
 
