@@ -4,6 +4,7 @@ const port = 3000;
 const cors = require("cors");
 const { Op } = require("sequelize");
 const { check } = require("express-validator");
+const { validateCreatePlayer } = require('./validators/playerValidator.js')
 
 app.use(express.json());
 app.use(
@@ -54,7 +55,7 @@ app.get("/players", check("q").escape(), async (req, res) => {
 });
 
 //ta det som finns i bodyn och skapar nytt objekt för att lägga in i arrayen.
-app.post("/players", async (req, res) => {
+app.post("/players", validateCreatePlayer, async (req, res) => {
   const play = {
     name: req.body.name,
     jersey: req.body.jersey,
