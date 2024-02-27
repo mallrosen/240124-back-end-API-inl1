@@ -3,6 +3,9 @@
 GET http://localhost:3000/players
 
 
+### Get single
+
+GET http://localhost:3000/players/7
 
 ### Create new
 
@@ -10,10 +13,10 @@ POST http://localhost:3000/players
 Content-Type: application/json; charset=utf-8
 
 {
-    "name": "Malin1 Rosén",
+    "name": "Malin Rosén",
     "jersey": 13,
     "position": "Goalie",
-    "team": "BAJEN"
+    "team": "Bajen"
 }
 
 
