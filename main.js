@@ -38,11 +38,11 @@ app.get("/players", check("q").escape(), async (req, res) => {
   let sortByName = req.query.sortByName || "name";
   let sortOrder = req.query.sortOrder || "asc";
   const players = await Player.findAll({
-    // where:{
-    //     name:{
-    //         [Op.like]: '%' + req.query.q + '%'
-    //     }
-    // },
+    where:{
+        name:{
+            [Op.like]: '%' + req.query.q + '%'
+        }
+    },
     order: [[sortByName, sortOrder]],
   });
   const result = players.map((p) => {

@@ -3,9 +3,6 @@
 GET http://localhost:3000/players
 
 
-# ### Get single
-
-# GET http://localhost:3000/players/1
 
 ### Create new
 
