@@ -22,30 +22,26 @@ app.listen(port, async () => {
   console.log(`Example app listening2 on port ${port}`);
 });
 
-// app.get('/players',async (req,res)=>{
-//     let players = await Player.findAll()
-//     let result = players.map(p=>({
-//         id: p.id,
-//         name: p.name,
-//         jersey: p.jersey,
-//         position: p.position,
-//         team: p.team
-//     }))
-//      res.json(result)
-// })
 
 app.get("/players", check("q").escape(), async (req, res) => {
   let sortByName = req.query.sortByName || "name";
   let sortOrder = req.query.sortOrder || "asc";
-  const players = await Player.findAll({
+  let q = req.query.q || "";
+  const offset = Number(req.query.offset || 0); 
+  const limit = Number(req.query.limit || 20);
+  const players = await Player.findAndCountAll({
     where:{
         name:{
-            [Op.like]: '%' + req.query.q + '%'
+            [Op.like]: '%' + q + '%'
         }
     },
     order: [[sortByName, sortOrder]],
+
+    offset: offset,
+    limit:limit
   });
-  const result = players.map((p) => {
+  const totalNr = players.count
+  const result = players.rows.map((p) => {
     return {
       id: p.id,  
       name: p.name,
@@ -54,7 +50,7 @@ app.get("/players", check("q").escape(), async (req, res) => {
       team: p.team,
     };
   });
-  return res.json(result);
+  return res.json({result, totalNr});
 });
 
 //ta det som finns i bodyn och skapar nytt objekt för att lägga in i arrayen.
@@ -72,25 +68,25 @@ app.post("/players", async (req, res) => {
   res.status(201).send("Created");
 });
 
-//HITTA EN PLAYER (BEHÖVS EJ)
+// HITTA EN PLAYER (BEHÖVS EJ)
 
-// app.get('/players/:userId',async (req,res)=>{
-//     console.log(req.params.userId)
-//     const thePlayer = await Player.findOne({
-//         where: {id: req.params.userId}
-//     })
+app.get('/players/:userId',async (req,res)=>{
+    console.log(req.params.userId)
+    const thePlayer = await Player.findOne({
+        where: {id: req.params.userId}
+    })
 
-//     if(thePlayer == undefined){
-//         res.status(404).send('Finns inte')
-//     }
-//     res.json(thePlayer)
+    if(thePlayer == undefined){
+        res.status(404).send('Finns inte')
+    }
+    res.json(thePlayer)
 
-// });
+});
 
 //Uppdatera - replacea hela objektet
-app.put("/players/:userId", async (req, res) => {
+app.put("/players/:id", async (req, res) => {
   const updatePlayer = await Player.findOne({
-    where: { id: req.params.userId },
+    where: { id: req.params.id },
   });
 
   if (updatePlayer == undefined) {
@@ -101,6 +97,7 @@ app.put("/players/:userId", async (req, res) => {
   updatePlayer.jersey = req.body.jersey;
   updatePlayer.position = req.body.position;
   updatePlayer.team = req.body.team;
+  updatePlayer.id = req.body.id;
 
   await updatePlayer.save();
 
@@ -108,8 +105,8 @@ app.put("/players/:userId", async (req, res) => {
 });
 
 //För att kunna radera
-app.delete("/players/:userId", (req, res) => {
-  let deletePlayer = players.find((player) => player.id == req.params.userId);
+app.delete("/players/:id", (req, res) => {
+  let deletePlayer = players.find((player) => player.id == req.params.id);
   // 404???
   if (deletePlayer == undefined) {
     res.status(404).send("Finns inte");
