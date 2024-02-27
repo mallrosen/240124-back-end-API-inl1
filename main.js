@@ -1,49 +1,76 @@
-const express = require('express')
-const app = express()
-const port = 3000
-const cors = require('cors')
+const express = require("express");
+const app = express();
+const port = 3000;
+const cors = require("cors");
+const { Op } = require("sequelize");
+const { check } = require("express-validator");
 
-var bodyParser = require('body-parser')
-app.use(bodyParser.json())
-app.use(cors())
+app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5500",
+    credentials: true,
+  })
+);
 
-const { sequelize, Player } = require('./models')
-const migrationhelper = require('./migrationhelper')
+const { sequelize, Player } = require("./models");
+const migrationhelper = require("./migrationhelper");
 
 app.listen(port, async () => {
-    await migrationhelper.migrate()
-    await sequelize.authenticate()
-    console.log(`Example app listening2 on port ${port}`)
-})
+  await migrationhelper.migrate();
+  await sequelize.authenticate();
+  console.log(`Example app listening2 on port ${port}`);
+});
 
+// app.get('/players',async (req,res)=>{
+//     let players = await Player.findAll()
+//     let result = players.map(p=>({
+//         id: p.id,
+//         name: p.name,
+//         jersey: p.jersey,
+//         position: p.position,
+//         team: p.team
+//     }))
+//      res.json(result)
+// })
 
-app.get('/players',async (req,res)=>{
-    let players = await Player.findAll()
-    let result = players.map(p=>({
-        id: p.id,
-        name: p.name,
-        jersey: p.jersey,
-        position: p.position,
-        team: p.team
-    }))
-     res.json(result)
-})
-
+app.get("/players", check("q").escape(), async (req, res) => {
+  let sortByName = req.query.sortByName || "name";
+  let sortOrder = req.query.sortOrder || "asc";
+  const players = await Player.findAll({
+    // where:{
+    //     name:{
+    //         [Op.like]: '%' + req.query.q + '%'
+    //     }
+    // },
+    order: [[sortByName, sortOrder]],
+  });
+  const result = players.map((p) => {
+    return {
+      id: p.id,  
+      name: p.name,
+      jersey: p.jersey,
+      position: p.position,
+      team: p.team,
+    };
+  });
+  return res.json(result);
+});
 
 //ta det som finns i bodyn och skapar nytt objekt för att lägga in i arrayen.
-app.post('/players', async (req, res)=>{
-    const play = {
-        name: req.body.name,
-        jersey: req.body.jersey,
-        position: req.body.position,
-        team: req.body.team
-    }
+app.post("/players", async (req, res) => {
+  const play = {
+    name: req.body.name,
+    jersey: req.body.jersey,
+    position: req.body.position,
+    team: req.body.team,
+  };
 
-    await Player.create(play)
+  await Player.create(play);
 
-    console.log(req.body);
-    res.status(201).send('Created')
-})
+  console.log(req.body);
+  res.status(201).send("Created");
+});
 
 //HITTA EN PLAYER (BEHÖVS EJ)
 
@@ -61,38 +88,32 @@ app.post('/players', async (req, res)=>{
 // });
 
 //Uppdatera - replacea hela objektet
-app.put('/players/:userId', async (req,res)=>{
+app.put("/players/:userId", async (req, res) => {
+  const updatePlayer = await Player.findOne({
+    where: { id: req.params.userId },
+  });
 
+  if (updatePlayer == undefined) {
+    res.status(404).send("Finns inte");
+  }
 
-    const updatePlayer = await Player.findOne({
-        where: {id: req.params.userId}
-    })
+  updatePlayer.name = req.body.name;
+  updatePlayer.jersey = req.body.jersey;
+  updatePlayer.position = req.body.position;
+  updatePlayer.team = req.body.team;
 
-    if(updatePlayer == undefined){
-        res.status(404).send('Finns inte')
-    }
+  await updatePlayer.save();
 
-    updatePlayer.name = req.body.name
-    updatePlayer.jersey = req.body.jersey
-    updatePlayer.position = req.body.position
-    updatePlayer.team = req.body.team
-
-    await updatePlayer.save()
-
-    res.status(204).send('Uppdaterat')
-
-
-
-})
-
+  res.status(204).send("Uppdaterat");
+});
 
 //För att kunna radera
-app.delete('/players/:userId',(req,res)=>{
-    let deletePlayer = players.find(player=>player.id == req.params.userId)
-    // 404???
-    if(deletePlayer == undefined){
-        res.status(404).send('Finns inte')
-    }
-    players.splice(players.indexOf(deletePlayer),1)
-    res.status(204).send('')  
+app.delete("/players/:userId", (req, res) => {
+  let deletePlayer = players.find((player) => player.id == req.params.userId);
+  // 404???
+  if (deletePlayer == undefined) {
+    res.status(404).send("Finns inte");
+  }
+  players.splice(players.indexOf(deletePlayer), 1);
+  res.status(204).send("");
 });
