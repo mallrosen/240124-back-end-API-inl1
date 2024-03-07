@@ -1,4 +1,5 @@
 const { Op } = require("sequelize");
+const { Player } = require("../models")
 
 //Uppdatera spelare
 async function onUpdatePlayer (req, res){
